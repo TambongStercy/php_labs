@@ -172,6 +172,7 @@ openssl req -new -x509 -key localhost.key -out localhost.crt -days 365 -subj "/C
 | Lab 3 | Advanced Database Operations | Prepared statements, Error handling, Sessions | `EmployeeDB`, `StudentDB` |
 | Lab 4 | Object-Oriented Programming | Classes, Inheritance, Polymorphism, Interfaces | `LibraryDB_OOP` |
 | Lab 5 | Authentication & OAuth | Sessions, Login/Register, Google OAuth | `LibraryDB_L5` |
+| Lab 6 | Web Application Security | SQL Injection, XSS, CSRF Prevention | `LibraryDB_L5` |
 
 ## Running and Testing Each Lab
 
@@ -487,6 +488,58 @@ INSERT INTO Students (name, email, phone_number) VALUES
 - ✅ Google OAuth integration works (if configured)
 - ✅ CRUD operations are restricted to authenticated users
 - ✅ User-specific data displays correctly
+
+---
+
+### Lab 6: Ensure Web Application Security
+
+**Objective:** Understand common web application security threats and learn how to prevent them.
+
+**Setup:**
+
+1.  **Copy files from Lab 5:** If you haven't already, copy the necessary files from the `lab5` directory to a new `lab6` directory. This lab builds upon the authentication and structure of Lab 5.
+    ```bash
+    cp -r lab5/* lab6/
+    ```
+2.  **Ensure Database is Setup:** Lab 6 uses the same database structure as Lab 5. Ensure the `LibraryDB_L5` database and its tables are created and populated with sample data (refer to Lab 5 setup). You can run `http://localhost/lab6/db_setup.php` if needed.
+
+**Exercises:**
+
+**Exercise 1: Preventing SQL Injection**
+-   **Objective:** Protect your application from SQL injection attacks using prepared statements.
+-   **Task:** Review `add_book.php` and ensure prepared statements with bound parameters are used for database inserts.
+
+**Exercise 2: Preventing Cross-Site Scripting (XSS)**
+-   **Objective:** Protect your application from XSS attacks by escaping output.
+-   **Task:** Review `library.php` and ensure `htmlspecialchars()` is used for displaying user-provided data.
+
+**Exercise 3: Implementing CSRF Protection**
+-   **Objective:** Protect your application from CSRF attacks using CSRF tokens.
+-   **Tasks:**
+    -   Create `csrf_token.php` to generate and store tokens.
+    -   Include `csrf_token.php` in `add_book.php`.
+    -   Add a hidden `csrf_token` field to the form in `add_book.php`.
+    -   Implement token verification in the POST handling of `add_book.php`.
+
+**Exercise 4: Hosting the Application on a Local Network**
+-   **Objective:** Host the PHP application on one computer and access it from another on the same network.
+-   **Tasks:**
+    -   Ensure web server (Apache) and MySQL are running.
+    -   Find the host computer's local IP address (`ipconfig` on Windows, `ifconfig` or `ip addr show` on Linux/macOS).
+    -   Access the application from another computer using `http://[HOST_COMPUTER_IP_ADDRESS]/lab6`.
+
+**Testing:**
+
+-   **Test SQL Injection:** Attempt to submit malicious SQL in form inputs in `add_book.php`. The application should prevent execution.
+-   **Test XSS:** Submit data containing JavaScript (e.g., `<script>alert('XSS');</script>`) through the form and view it on `library.php`. It should display as plain text.
+-   **Test CSRF:** Attempt to submit the `add_book.php` form from a different origin (e.g., a simple HTML page on another domain or even a local file opened in the browser). The request should be rejected due to token mismatch.
+-   **Test Local Network Access:** Access all pages and functionalities of the Lab 6 application from another computer on your local network.
+
+**Expected Results:**
+- ✅ Application is resistant to common SQL injection attempts.
+- ✅ User-provided data is displayed safely, preventing XSS.
+- ✅ Form submissions are protected against CSRF.
+- ✅ Application is accessible and functional from other devices on the local network.
 
 ## Troubleshooting
 
