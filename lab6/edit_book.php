@@ -1,6 +1,7 @@
 <?php
 require_once 'auth_check.php';
 require_once 'db_connect.php'; // For database connection
+require_once 'csrf_token.php'; // Include CSRF token generation
 
 $book_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
@@ -19,49 +20,54 @@ $conn = connectToDatabase(DB_SERVER_L5, DB_USERNAME_L5, DB_PASSWORD_L5, DB_NAME_
 
 // Handle Form Submission (POST request)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Sanitize and retrieve form data
-    $title = trim($_POST['title']);
-    $author = trim($_POST['author']);
-    $publication_year = trim($_POST['publication_year']);
-    $genre = trim($_POST['genre']);
-    $price = trim($_POST['price']);
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        $errors[] = "Invalid CSRF token.";
+        error_log("CSRF token validation failed for user ID: " . ($_SESSION['user_id'] ?? 'Not logged in') . ". Session token: " . ($_SESSION['csrf_token'] ?? 'Not set') . ". POST token: " . ($_POST['csrf_token'] ?? 'Not set'));
+    } else {
+        // Sanitize and retrieve form data
+        $title = trim($_POST['title']);
+        $author = trim($_POST['author']);
+        $publication_year = trim($_POST['publication_year']);
+        $genre = trim($_POST['genre']);
+        $price = trim($_POST['price']);
 
-    // Basic Validation
-    if (empty($title)) {
-        $errors[] = "Title is required.";
-    }
-    if (!empty($publication_year) && !filter_var($publication_year, FILTER_VALIDATE_INT)) {
-        $errors[] = "Publication year must be a valid integer.";
-    }
-    if (!empty($price) && !filter_var($price, FILTER_VALIDATE_FLOAT) && $price !== '0') {
-        $errors[] = "Price must be a valid number.";
-    } elseif (empty($price)) {
-        $price = null; // Allow price to be optional, set to NULL if empty
-    }
-
-    if (empty($errors)) {
-        $sql = "UPDATE Books SET title = ?, author = ?, publication_year = ?, genre = ?, price = ? WHERE book_id = ?";
-        $stmt = $conn->prepare($sql);
-        if ($stmt) {
-            $pub_year_to_update = !empty($publication_year) ? (int) $publication_year : null;
-            $stmt->bind_param("ssisdi", $title, $author, $pub_year_to_update, $genre, $price, $book_id);
-
-            if ($stmt->execute()) {
-                $_SESSION['message'] = "Book '" . htmlspecialchars($title) . "' updated successfully!";
-                $_SESSION['message_type'] = "success";
-                $stmt->close();
-                // $conn->close(); // Close connection after redirect
-                header("Location: library.php");
-                exit();
-            } else {
-                $errors[] = "Error updating book: " . $stmt->error;
-            }
-            $stmt->close();
-        } else {
-            $errors[] = "Error preparing statement: " . $conn->error;
+        // Basic Validation
+        if (empty($title)) {
+            $errors[] = "Title is required.";
         }
-    } // If errors, form will be redisplayed with $title, $author etc. holding submitted values
+        if (!empty($publication_year) && !filter_var($publication_year, FILTER_VALIDATE_INT)) {
+            $errors[] = "Publication year must be a valid integer.";
+        }
+        if (!empty($price) && !filter_var($price, FILTER_VALIDATE_FLOAT) && $price !== '0') {
+            $errors[] = "Price must be a valid number.";
+        } elseif (empty($price)) {
+            $price = null; // Allow price to be optional, set to NULL if empty
+        }
 
+        if (empty($errors)) {
+            $sql = "UPDATE Books SET title = ?, author = ?, publication_year = ?, genre = ?, price = ? WHERE book_id = ?";
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                $pub_year_to_update = !empty($publication_year) ? (int) $publication_year : null;
+                $stmt->bind_param("ssisdi", $title, $author, $pub_year_to_update, $genre, $price, $book_id);
+
+                if ($stmt->execute()) {
+                    $_SESSION['message'] = "Book '" . htmlspecialchars($title) . "' updated successfully!";
+                    $_SESSION['message_type'] = "success";
+                    $stmt->close();
+                    // $conn->close(); // Close connection after redirect
+                    header("Location: library.php");
+                    exit();
+                } else {
+                    $errors[] = "Error updating book: " . $stmt->error;
+                }
+                $stmt->close();
+            } else {
+                $errors[] = "Error preparing statement: " . $conn->error;
+            }
+        } // If errors, form will be redisplayed with $title, $author etc. holding submitted values
+    }
 } else { // This is a GET request, so fetch existing book data
     $stmt_fetch = $conn->prepare("SELECT title, author, publication_year, genre, price FROM Books WHERE book_id = ?");
     if ($stmt_fetch) {
@@ -183,6 +189,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             ?>
 
             <form action="edit_book.php?id=<?php echo htmlspecialchars($book_id); ?>" method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                 <div class="form-group">
                     <label for="title">Title:</label>
                     <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($title); ?>" required>

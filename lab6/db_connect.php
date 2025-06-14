@@ -20,4 +20,3 @@ function connectToDatabase($server, $username, $password, $db_name)
 // To connect in Lab 5 files:
 // require_once 'db_connect.php';
 // $conn = connectToDatabase(DB_SERVER_L5, DB_USERNAME_L5, DB_PASSWORD_L5, DB_NAME_L5);
-?>

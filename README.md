@@ -1,5 +1,11 @@
 # PHP Lab Exercises - Comprehensive Guide
 
+**Demonstration Videos Available:**
+
+Videos demonstrating how Lab 2, Lab 3, Lab 4, Lab 5, and Lab 6 work are included in the root directory of this repository. You can watch these videos to see example workflows, expected results, and how to interact with each lab in practice.
+
+---
+
 This repository contains 5 comprehensive PHP lab exercises covering fundamental to advanced web development concepts including database operations, object-oriented programming, authentication, and OAuth integration.
 
 ## Table of Contents

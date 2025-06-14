@@ -1,4 +1,4 @@
 <?php
-header("Location: lab6/home.php");
+header("Location: home.php");
 exit();
 ?>

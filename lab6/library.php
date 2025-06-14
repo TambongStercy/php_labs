@@ -1,6 +1,7 @@
 <?php
 require_once 'auth_check.php'; // Ensures user is logged in
 require_once 'db_connect.php';
+require_once 'csrf_token.php'; // Include CSRF token generation
 $conn = connectToDatabase(DB_SERVER_L5, DB_USERNAME_L5, DB_PASSWORD_L5, DB_NAME_L5);
 
 // Fetch books for display (this will be expanded in Exercise 4 for CRUD)
@@ -157,8 +158,14 @@ if ($result) {
                                     <td>FCFA <?php echo htmlspecialchars(number_format($book['price'], 0, '.', ',')); ?></td>
                                     <td class="action-links">
                                         <a href="edit_book.php?id=<?php echo $book['book_id']; ?>" class="edit-link">Edit</a>
-                                        <a href="delete_book.php?id=<?php echo $book['book_id']; ?>" class="delete-link"
-                                            onclick="return confirm('Are you sure you want to delete this book?');">Delete</a>
+                                        <form action="delete_book.php" method="POST" class="inline-block"
+                                            onsubmit="return confirm('Are you sure you want to delete this book?');">
+                                            <input type="hidden" name="id" value="<?php echo $book['book_id']; ?>">
+                                            <input type="hidden" name="csrf_token"
+                                                value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                                            <button type="submit" class="delete-link"
+                                                style="background:none; border:none; color:inherit; cursor:pointer; padding:0;">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

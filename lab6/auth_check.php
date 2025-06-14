@@ -39,4 +39,3 @@ $_SESSION['last_activity'] = time(); // Update last activity time for current re
 //     session_regenerate_id(true);
 //     $_SESSION['created'] = time();
 // }
-?>

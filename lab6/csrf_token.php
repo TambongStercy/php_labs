@@ -18,4 +18,3 @@ if (empty($_SESSION['csrf_token'])) {
         error_log('Using uniqid with mt_rand for CSRF token generation. Consider upgrading PHP or enabling random_bytes/openssl_random_pseudo_bytes for better security.');
     }
 }
-?>
